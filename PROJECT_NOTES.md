@@ -111,9 +111,16 @@ A GitHub workflow (`.github/workflows/monthly-refresh.yml`) runs `refresh.py` on
 
 Start every new Claude session with the `frederick-leads` repository selected.
 
+## Google Sheet (Session 2)
+
+- Sheet: [Frederick Leads](https://docs.google.com/spreadsheets/d/1SmklUJ2sbPe_rfIH0I4xpXUBapUtH1C1mqiOJFkfOos/edit) in the Google Drive `frederick-leads` folder.
+- Holds the top 200 properties, plus tracking columns: Status (dropdown), Owner name, Notes, First contacted, Follow-up date.
+- The script `google-sheet/leads_sync.gs` pulls `top_properties.csv` from GitHub (read-only token) on the 16th of each month, or from the sheet's **Frederick Leads > Update now** menu.
+- Updates add new properties, refresh data on existing ones, and never change the tracking columns or any columns you add. Properties that leave the top 200 stay, marked "No".
+- One-time setup steps: `google-sheet/SETUP.md`. The GitHub token expires yearly.
+
 ## Next steps
 
-- **Session 2:** Google Sheet for reviewing and tracking leads.
 - **Session 3:** matching step.
 - Later ideas:
   - compare monthly backups to spot changes (new out-of-state owners, recent trust transfers);

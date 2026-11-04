@@ -41,6 +41,7 @@ const LEADS_TAB = 'Leads';
 const LOG_TAB = 'Sync log';
 const INSTRUCTIONS_TAB = 'Instructions';
 const INSTRUCTIONS_PATH = 'google-sheet/instructions.txt';
+const TABS_PATH = 'google-sheet/tabs.json';
 const KEY_HEADER = 'Account ID';
 const TOKEN_PROPERTY = 'GITHUB_TOKEN';
 
@@ -179,7 +180,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Frederick Leads')
     .addItem('Update now', 'syncLeads')
-    .addItem('Refresh instructions', 'writeInstructions')
+    .addItem('Refresh instructions and tabs', 'refreshExtras')
     .addSeparator()
     .addItem('Set up (first time)', 'setup')
     .addItem('Change GitHub token', 'promptForToken')
@@ -252,6 +253,70 @@ function instructionLines(text) {
   });
 }
 
+/** Rebuilds the Instructions tab and creates or extends the tabs listed in tabs.json. */
+function refreshExtras() {
+  buildTabs();
+  writeInstructions();
+}
+
+/**
+ * Works out the header row for a tab: existing headers stay where they are
+ * (including any you added yourself); columns from the layout that are
+ * missing get added at the end. Returns the new header row.
+ */
+function planHeaders(existing, columns) {
+  const headers = existing.map(h => String(h).trim());
+  while (headers.length && headers[headers.length - 1] === '') headers.pop();  // drop trailing blanks only
+  columns.forEach(c => { if (!headers.includes(c.name)) headers.push(c.name); });
+  return headers;
+}
+
+function buildTabs() {
+  const spec = JSON.parse(fetchGithubFile(TABS_PATH));
+  const ss = SpreadsheetApp.getActive();
+  (spec.tabs || []).forEach(tab => buildTab(ss, tab));
+}
+
+function buildTab(ss, tab) {
+  let sheet = ss.getSheetByName(tab.name);
+  const isNew = !sheet;
+  if (isNew) {
+    const anchor = tab.after && ss.getSheetByName(tab.after);
+    sheet = anchor ? ss.insertSheet(tab.name, anchor.getIndex()) : ss.insertSheet(tab.name);
+  }
+  const lastCol = Math.max(sheet.getLastColumn(), 1);
+  const existing = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const headers = planHeaders(existing, tab.columns);
+  if (sheet.getMaxColumns() < headers.length) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), headers.length - sheet.getMaxColumns());
+  }
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setWrap(true);
+
+  const rows = sheet.getMaxRows() - 1;
+  tab.columns.forEach(c => {
+    const col = headers.indexOf(c.name) + 1;
+    const head = sheet.getRange(1, col);
+    const body = sheet.getRange(2, col, rows, 1);
+    head.setNote(c.note || '').setBackground(c.auto ? '#e7f1fb' : '#f9eeda');
+    if (c.width) sheet.setColumnWidth(col, c.width);
+    if (c.type === 'list') {
+      body.setDataValidation(SpreadsheetApp.newDataValidation()
+        .requireValueInList(c.options, true).setAllowInvalid(true).build());
+    } else if (c.type === 'date') {
+      body.setDataValidation(SpreadsheetApp.newDataValidation()
+        .requireDate().setAllowInvalid(true).build());
+      body.setNumberFormat('yyyy-mm-dd');
+    } else {
+      body.setNumberFormat('@');
+    }
+  });
+
+  if (isNew) sheet.setFrozenRows(1);
+  const filter = sheet.getFilter();
+  if (filter && filter.getRange().getNumColumns() < headers.length) filter.remove();  // widen it for new columns
+  if (!sheet.getFilter()) sheet.getRange(1, 1, sheet.getMaxRows(), headers.length).createFilter();
+}
+
 function writeInstructions() {
   const ss = SpreadsheetApp.getActive();
   const lines = instructionLines(fetchGithubFile(INSTRUCTIONS_PATH));
@@ -317,9 +382,9 @@ function syncLeads() {
     if (firstTime) formatSheet(sheet, m.headers);
     let note = 'OK';
     try {
-      writeInstructions();
+      refreshExtras();
     } catch (e) {
-      note = 'OK (instructions not refreshed: ' + e.message + ')';  // the leads update still counts
+      note = 'OK (instructions/tabs not refreshed: ' + e.message + ')';  // the leads update still counts
     }
     log(ss, today, m.counts, note);
     return m.counts;

@@ -117,13 +117,15 @@ Start every new Claude session with the `frederick-leads` repository selected.
 - Holds the top 200 properties, plus tracking columns: Status (dropdown), Owner name, Notes, First contacted, Follow-up date.
 - The script `google-sheet/leads_sync.gs` pulls `top_properties.csv` from GitHub (read-only token) on the 16th of each month, or from the sheet's **Frederick Leads > Update now** menu.
 - Updates add new properties, refresh data on existing ones, and never change the tracking columns or any columns you add. Properties that leave the top 200 stay, marked "No".
+- **Filings tab:** where weekly court and estate search results are entered (Date entered, Source, Case type, Case number, Filing date, Names, Property address, City, ZIP, Case status, Notes). Two blue columns, Matched Account ID and Match result, are for the Session 3 matching script.
+- Tab layouts come from `google-sheet/tabs.json` and the Instructions tab from `google-sheet/instructions.txt`, both read from GitHub at each update. Changing them needs no re-paste of the script.
 - One-time setup steps: `google-sheet/SETUP.md`. Completed November 4, 2026: 200 properties loaded, sync log OK.
 - The GitHub token expires yearly; when it does, make a new one and use **Frederick Leads > Change GitHub token**.
 - Open the Apps Script editor in a private window signed in only as bobbynaharprojects@gmail.com (multiple signed-in Google accounts cause "unable to open the file").
 
 ## Next steps
 
-- **Session 3:** matching step.
+- **Session 3:** matching and scoring. Match filings against the **full database** (all 89,599 residential properties), not just the sheet's top 200, since foreclosures often hit low-scoring, owner-occupied homes. Filings should count more than base flags (e.g. +3 for a foreclosure). Divorces and estates often have only names, so check real search results before designing that part.
 - Later ideas:
   - compare monthly backups to spot changes (new out-of-state owners, recent trust transfers);
   - revisit the double-counting of long ownership in the score.

@@ -3,8 +3,16 @@ This sheet lists likely distressed, off-market homes in Frederick County, Maryla
 
 ## The tabs
 Leads: one row per property. This is where you work.
+Filings: where you paste each week's court and estate search results (see "Weekly filings" below).
 Sync log: one line for each update, with how many properties were added or updated, and any errors.
 Instructions: this page. It is rebuilt at each update, so don't type notes here.
+
+## Weekly filings
+Each week, add one row per new filing you find in Maryland Judiciary Case Search (foreclosure, divorce, eviction) or the Register of Wills Estate Search (new estates).
+Yellow columns are yours: Date entered, Source, Case type, Case number, Filing date, Names, Property address, City, ZIP, Case status, Notes. Hover over a header to see what goes in it.
+Fill in the property address whenever the search results show one. Foreclosures and evictions usually do; divorces and estates often don't.
+Blue columns (Matched Account ID, Match result) are filled in automatically once matching is set up. Leave them blank.
+Keep old rows. Each filing only needs to be entered once.
 
 ## Your columns (yellow headers)
 Status: pick from the dropdown. New (not looked at yet), Researching, Letter sent, Contacted, Follow up, Not interested, Deal.
@@ -43,6 +51,7 @@ Look these up one at a time by hand. The state's website blocks automated lookup
 Sort or filter: click the small arrow in any header, for example filter Status to "New", or sort by Score.
 Your own columns: add them at the far right (for example "Phone"). Updates won't touch them.
 Update now: Frederick Leads menu > Update now pulls the latest list any time.
+Refresh instructions and tabs: Frederick Leads menu > Refresh instructions and tabs picks up changes to this page and to the tab layouts.
 
 ## Please don't
 Rename or delete the existing column headers. The update finds columns by their names.

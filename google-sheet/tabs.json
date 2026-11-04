@@ -1,0 +1,39 @@
+{
+  "_about": "Extra tabs the sheet script creates. Changing this file in GitHub changes the sheet at the next update (or Frederick Leads > Refresh instructions and tabs). Columns are only ever added, never removed, and existing data is never changed.",
+  "tabs": [
+    {
+      "name": "Filings",
+      "after": "Leads",
+      "columns": [
+        {"name": "Date entered", "type": "date", "width": 100,
+         "note": "The day you added this row."},
+        {"name": "Source", "type": "list", "width": 150,
+         "options": ["Court Case Search", "Estate Search", "Tax sale list", "Driving for dollars", "Other"],
+         "note": "Where you found it."},
+        {"name": "Case type", "type": "list", "width": 130,
+         "options": ["Foreclosure", "Divorce", "Eviction", "Estate", "Tax sale", "Lien", "Code violation", "Vacant / run-down", "Other"],
+         "note": "What kind of filing or trigger this is."},
+        {"name": "Case number", "type": "text", "width": 140,
+         "note": "Case or estate number, exactly as shown in the search results."},
+        {"name": "Filing date", "type": "date", "width": 100,
+         "note": "The date the case or estate was filed."},
+        {"name": "Names", "type": "text", "width": 220,
+         "note": "Party names as shown (defendant, decedent, etc.). Separate several names with a semicolon."},
+        {"name": "Property address", "type": "text", "width": 220,
+         "note": "Street address of the property, if the search results show one (e.g. 123 MAIN ST). Leave blank if there is none."},
+        {"name": "City", "type": "text", "width": 120,
+         "note": "City or town of the property address."},
+        {"name": "ZIP", "type": "text", "width": 70,
+         "note": "5-digit ZIP code of the property address."},
+        {"name": "Case status", "type": "text", "width": 110,
+         "note": "Status shown in the search results (e.g. Open, Closed)."},
+        {"name": "Notes", "type": "text", "width": 260,
+         "note": "Anything else worth keeping. You can paste a whole line from the search results here."},
+        {"name": "Matched Account ID", "type": "text", "width": 130, "auto": true,
+         "note": "Filled in automatically (Session 3): the property this filing matched in the database."},
+        {"name": "Match result", "type": "text", "width": 160, "auto": true,
+         "note": "Filled in automatically (Session 3): Matched, No match, or Needs name lookup."}
+      ]
+    }
+  ]
+}

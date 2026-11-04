@@ -1,0 +1,55 @@
+# How to use Frederick Leads
+This sheet lists likely distressed, off-market homes in Frederick County, Maryland, ranked by a distress score. It updates itself on the 16th of each month from free State of Maryland property records.
+
+## The tabs
+Leads: one row per property. This is where you work.
+Sync log: one line for each update, with how many properties were added or updated, and any errors.
+Instructions: this page. It is rebuilt at each update, so don't type notes here.
+
+## Your columns (yellow headers)
+Status: pick from the dropdown. New (not looked at yet), Researching, Letter sent, Contacted, Follow up, Not interested, Deal.
+Owner name: the state data has no owner names. Type it in yourself (see "Finding the owner's name" below).
+Notes: anything you learn about the property or the owner.
+First contacted: the date you first reached out. Double-click the cell for a calendar.
+Follow-up date: when to get back in touch. Double-click the cell for a calendar.
+Updates never change these columns.
+
+## The score
+Score runs from 0 to 5: one point for each flag marked Yes.
+Absentee: the owner doesn't live there (the state says so, or the mailing address is somewhere else, including a P.O. Box).
+Out of state: the owner's mailing address is outside Maryland.
+Long-time owner: last sold or transferred 15 or more years ago.
+High equity: last sold or transferred 20 or more years ago, or the last normal sale price was under half of today's value. This is a guess: the data has no mortgage information.
+Older home: built before 1980.
+
+## The other columns
+Mailing address, city, state, ZIP: where the owner gets mail. Use this for letters, addressed to "Current Owner" or to the name you find.
+Assessed value: the state's current full market value estimate.
+Last sale date and price: the most recent transfer. A blank price usually means a family or trust transfer, not a market sale.
+Years since sale: years from the last sale to the most recent update.
+Owner-occupied code: H = owner lives there, D = partly owner-occupied, N = not owner-occupied.
+Account ID: the state's tax account number. It identifies the property; don't change it.
+SDAT link: opens the state's page for the property.
+In current top 200: Yes = in this month's top 200. No = it dropped out, but stays here so your notes are kept.
+First added / Last updated: when the property first appeared here, and when its data was last refreshed.
+
+## Finding the owner's name
+1. Click the SDAT link in the property's row.
+2. The state's page shows the owner's name near the top.
+3. Type it into Owner name.
+Look these up one at a time by hand. The state's website blocks automated lookups.
+
+## Everyday tips
+Sort or filter: click the small arrow in any header, for example filter Status to "New", or sort by Score.
+Your own columns: add them at the far right (for example "Phone"). Updates won't touch them.
+Update now: Frederick Leads menu > Update now pulls the latest list any time.
+
+## Please don't
+Rename or delete the existing column headers. The update finds columns by their names.
+Change the Account ID column.
+Delete rows you're done with. Set Status to "Not interested" instead, so they don't come back as "New".
+
+## If something goes wrong
+Check the Sync log tab for the error.
+"GitHub rejected the token": the token expired (once a year). Create a new one (see google-sheet/SETUP.md in GitHub), then Frederick Leads menu > Change GitHub token.
+"Sorry, unable to open the file" when opening Extensions > Apps Script: you're signed in to more than one Google account. Use a private window signed in only as bobbynaharprojects@gmail.com.

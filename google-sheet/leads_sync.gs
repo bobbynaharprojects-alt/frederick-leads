@@ -39,6 +39,8 @@ const STATUS_OPTIONS = [
 
 const LEADS_TAB = 'Leads';
 const LOG_TAB = 'Sync log';
+const INSTRUCTIONS_TAB = 'Instructions';
+const INSTRUCTIONS_PATH = 'google-sheet/instructions.txt';
 const KEY_HEADER = 'Account ID';
 const TOKEN_PROPERTY = 'GITHUB_TOKEN';
 
@@ -177,6 +179,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Frederick Leads')
     .addItem('Update now', 'syncLeads')
+    .addItem('Refresh instructions', 'writeInstructions')
     .addSeparator()
     .addItem('Set up (first time)', 'setup')
     .addItem('Change GitHub token', 'promptForToken')
@@ -215,9 +218,13 @@ function promptForToken() {
 }
 
 function fetchCsv() {
+  return Utilities.parseCsv(fetchGithubFile(CSV_PATH));
+}
+
+function fetchGithubFile(path) {
   const token = PropertiesService.getScriptProperties().getProperty(TOKEN_PROPERTY);
   if (!token) throw new Error('No GitHub token saved. Use Frederick Leads > Set up (first time).');
-  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CSV_PATH}?ref=main`;
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}?ref=main`;
   const resp = UrlFetchApp.fetch(url, {
     headers: {
       Authorization: 'Bearer ' + token,
@@ -230,7 +237,37 @@ function fetchCsv() {
   if (code === 401) throw new Error('GitHub rejected the token (it may have expired). Use Frederick Leads > Change GitHub token.');
   if (code === 404) throw new Error('GitHub could not find the file, or the token has no access to the repository.');
   if (code !== 200) throw new Error(`GitHub returned an error (${code}).`);
-  return Utilities.parseCsv(resp.getContentText());
+  return resp.getContentText();
+}
+
+/**
+ * Turns instructions.txt into rows for the Instructions tab.
+ * "# " = title, "## " = section heading, anything else = a normal line.
+ */
+function instructionLines(text) {
+  return text.split(/\r?\n/).map(line => {
+    if (line.startsWith('## ')) return { text: line.slice(3), style: 'heading' };
+    if (line.startsWith('# ')) return { text: line.slice(2), style: 'title' };
+    return { text: line, style: 'normal' };
+  });
+}
+
+function writeInstructions() {
+  const ss = SpreadsheetApp.getActive();
+  const lines = instructionLines(fetchGithubFile(INSTRUCTIONS_PATH));
+  let sheet = ss.getSheetByName(INSTRUCTIONS_TAB);
+  if (!sheet) sheet = ss.insertSheet(INSTRUCTIONS_TAB, 0);
+  sheet.clear();
+  const range = sheet.getRange(1, 1, lines.length, 1);
+  range.setNumberFormat('@').setValues(lines.map(l => [l.text]))
+    .setWrap(true).setVerticalAlignment('top').setFontSize(11).setFontWeight('normal');
+  lines.forEach((l, i) => {
+    if (l.style === 'title') sheet.getRange(i + 1, 1).setFontSize(16).setFontWeight('bold');
+    if (l.style === 'heading') sheet.getRange(i + 1, 1).setFontSize(12).setFontWeight('bold').setBackground('#f0efec');
+  });
+  sheet.setColumnWidth(1, 820);
+  sheet.setHiddenGridlines(true);
+  if (sheet.getMaxColumns() > 1) sheet.hideColumns(2, sheet.getMaxColumns() - 1);
 }
 
 function syncLeads() {
@@ -278,7 +315,13 @@ function syncLeads() {
     }
 
     if (firstTime) formatSheet(sheet, m.headers);
-    log(ss, today, m.counts, 'OK');
+    let note = 'OK';
+    try {
+      writeInstructions();
+    } catch (e) {
+      note = 'OK (instructions not refreshed: ' + e.message + ')';  // the leads update still counts
+    }
+    log(ss, today, m.counts, note);
     return m.counts;
   } catch (err) {
     log(ss, new Date(), null, 'FAILED: ' + err.message);

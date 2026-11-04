@@ -1,0 +1,4 @@
+# The database is rebuilt by refresh.py (and is too big for GitHub)
+properties.db
+properties.db.new
+__pycache__/

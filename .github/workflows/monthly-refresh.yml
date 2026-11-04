@@ -1,0 +1,72 @@
+# Monthly refresh of the Frederick County property database.
+#
+# Runs refresh.py on GitHub's computers, then:
+#   - saves a compressed copy of properties.db (all state records + flags)
+#     as a dated download on the repository's Releases page
+#   - saves the new top_properties.csv to the repository
+#
+# When it runs:
+#   - automatically on the 15th of every month
+#   - whenever this file is changed (so a change can be tested right away)
+#   - on demand: Actions tab > "Monthly refresh" > "Run workflow"
+
+name: Monthly refresh
+
+on:
+  schedule:
+    - cron: "17 11 15 * *"   # 15th of each month, 11:17 UTC (6:17 or 7:17 am Eastern)
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/monthly-refresh.yml"]
+
+permissions:
+  contents: write
+
+concurrency: monthly-refresh
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download state data and rebuild the database
+        run: python3 refresh.py
+
+      - name: Compress the database
+        id: pack
+        run: |
+          day=$(date -u +%Y-%m-%d)
+          file="properties-${day}.db.gz"
+          gzip -c properties.db > "$file"
+          state_month=$(python3 -c "import sqlite3; print(sqlite3.connect('properties.db').execute('select max(data_as_of) from properties').fetchone()[0])")
+          echo "file=$file" >> "$GITHUB_OUTPUT"
+          echo "tag=data-${day}-run${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "day=$day" >> "$GITHUB_OUTPUT"
+          echo "state_month=$state_month" >> "$GITHUB_OUTPUT"
+
+      - name: Save the backup on the Releases page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.pack.outputs.tag }}" "${{ steps.pack.outputs.file }}" \
+            --title "Property data ${{ steps.pack.outputs.day }} (state data: ${{ steps.pack.outputs.state_month }})" \
+            --notes "Frederick County property database refreshed ${{ steps.pack.outputs.day }}. State data month: ${{ steps.pack.outputs.state_month }}. To use: download, unzip (gunzip), and open properties.db with any SQLite tool."
+
+      - name: Save the new top 200 list
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add top_properties.csv
+          if git diff --cached --quiet; then
+            echo "Top 200 list unchanged."
+          else
+            git commit -m "Monthly refresh: top 200 for ${{ steps.pack.outputs.day }} (state data ${{ steps.pack.outputs.state_month }})"
+            git push
+          fi

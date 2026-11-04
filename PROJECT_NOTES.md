@@ -117,7 +117,9 @@ Start every new Claude session with the `frederick-leads` repository selected.
 - Holds the top 200 properties, plus tracking columns: Status (dropdown), Owner name, Notes, First contacted, Follow-up date.
 - The script `google-sheet/leads_sync.gs` pulls `top_properties.csv` from GitHub (read-only token) on the 16th of each month, or from the sheet's **Frederick Leads > Update now** menu.
 - Updates add new properties, refresh data on existing ones, and never change the tracking columns or any columns you add. Properties that leave the top 200 stay, marked "No".
-- One-time setup steps: `google-sheet/SETUP.md`. The GitHub token expires yearly.
+- One-time setup steps: `google-sheet/SETUP.md`. Completed November 4, 2026: 200 properties loaded, sync log OK.
+- The GitHub token expires yearly; when it does, make a new one and use **Frederick Leads > Change GitHub token**.
+- Open the Apps Script editor in a private window signed in only as bobbynaharprojects@gmail.com (multiple signed-in Google accounts cause "unable to open the file").
 
 ## Next steps
 
